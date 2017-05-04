@@ -47,7 +47,7 @@ def topKMatches(train, userid, itemid, k=30):
     for item in train[userid]:
         item_set.append(item)
 
-    scores = [(w[itemid][item], item) for item in item_set if itemid != item]
+    scores = [(w[itemid][item], item) for item in item_set if itemid != item and item in w[itemid]]
 
     scores.sort()
     scores.reverse()
