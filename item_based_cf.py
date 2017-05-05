@@ -35,6 +35,7 @@ def getAverage(prefer, userId):
         count = count+1
     return sum/count
 
+
 #获取当前要预测的项目的最近邻居项目。
 def topKMatches(train, w,userid, itemid, k=30):
     #item_set是该用户评价过的所有商品。
