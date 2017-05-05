@@ -5,7 +5,6 @@ from math import sqrt
 
 #得到物品之间的相似度。W是用来项目之间相似度的矩阵。
 def ItemSimilarity(train):
-
     # 建立物品-物品的共现矩阵
     C = dict()  # 物品-物品的共现矩阵
     N = dict()  # 物品被多少个不同用户购买
@@ -37,13 +36,12 @@ def getAverage(prefer, userId):
     return sum/count
 
 #获取当前要预测的项目的最近邻居项目。
-def topKMatches(train, userid, itemid, k=30):
+def topKMatches(train, w,userid, itemid, k=30):
     #item_set是该用户评价过的所有商品。
     item_set=[]
     #items才是当前待评价商品的最近邻居商品。
     items=[]
 
-    w = ItemSimilarity(train)
     for item in train[userid]:
         item_set.append(item)
 
@@ -68,11 +66,13 @@ def getRating(train, userid, itemid):
     if itemid not in w.keys():
         s=getAverage(train, userid)
     else:
-        items = topKMatches(train, userid, itemid)
+        items = topKMatches(train,w, userid, itemid)
         s=0
+        wight_count=0
         for i in items:
             s=s+i[0]*train[userid][i[1]]
-    return s
+            wight_count+=i[0]
+    return s/wight_count
 
 
 #通过调用getRating函数来获取预测评分。
@@ -81,12 +81,13 @@ def getAllRating(trainFilename, testFilename, fileResult):
     test = loadMovieLensTest(testFilename)
     inAllnum = 0
 
-    file = open(fileResult, 'a')
+    file = open(fileResult, 'w')
     for userid in test:
         for itemid in test[userid]:
             rating = getRating(train, userid, itemid)
             file.write('%s,%s,%s\n'%(userid, itemid, rating))
             inAllnum = inAllnum +1
+            print("complete :%d"%inAllnum)
     file.close()
     print("-------------Completed!!-----------",inAllnum)
 
