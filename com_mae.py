@@ -47,6 +47,8 @@ plt.plot(range(1,6),lst_pearson,label='user_based_with_pearson')
 plt.plot(range(1,6),lst_item,label='item_based')
 plt.legend(loc='upper right')
 plt.grid()
+plt.xlabel('train set')
+plt.ylabel('MAE')
 plt.savefig('mae')
 plt.show()
 
