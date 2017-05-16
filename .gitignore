@@ -6,7 +6,7 @@ __pycache__/
 
 movielens/
 u1result.csv/
-user_based_with_cos/
-user_based_with_adcos/
-user_based_with_pearson/
+user_based_with_sim_cos/
+user_based_with_sim_adcos/
+user_based_with_sim_pearson/
 item_based/
