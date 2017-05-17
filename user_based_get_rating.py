@@ -1,8 +1,8 @@
 from load_movielens import loadMovieLensTrain
 from load_movielens import loadMovieLensTest
-from similarity_function import sim_adcos
-from similarity_function import sim_cos
-from similarity_function import sim_pearson
+from user_based_similarity_function import sim_adcos
+from user_based_similarity_function import sim_cos
+from user_based_similarity_function import sim_pearson
 
 
 import time
