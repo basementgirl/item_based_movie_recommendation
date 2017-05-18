@@ -9,38 +9,34 @@ start_time=time.time()
 
 
 def topKMatches(trainSet, presentUserid, presentItemid, sim,k=30):
-    userSet = []#userSet表示评价过当前商品的所有用户
-    neighborUsers = []#neighborUsers最近邻居用户。
-    for user in trainSet:
-        if presentItemid in trainSet[user]:
-            userSet.append(user)
-    scores = [(sim(trainSet, presentUserid, other),other) for other in userSet if other!=presentUserid]
+    scores = [(sim(trainSet, presentUserid, other),other) for other in trainSet[presentUserid] if other!=presentItemid]
     scores.sort()
     scores.reverse()
-    if len(scores)<=k:
-        for item in scores:
-            neighborUsers.append(item[1])
-        return neighborUsers
-    else:
-        kscore = scores[0:k]
-        for item in kscore:
-            neighborUsers.append(item[1])
-        return neighborUsers
 
-def getRating(trainSet, presentUserid, presentItemid,sim):
-    jiaquanAverage = 0.0
-    simSums = 0.0
-    neighborUsers = topKMatches(trainSet, presentUserid, presentItemid, sim)
-    averageOfUser = getAverage(trainSet, presentUserid)
-    for other in neighborUsers:
-        similarity = sim(trainSet, presentUserid, other)
-        averageOther = getAverage(trainSet, other)
-        simSums += abs(similarity )
-        jiaquanAverage +=  (trainSet[other][presentItemid]-averageOther)*similarity
-    if simSums==0:
-        return averageOfUser
+    if len(scores)<=k:
+        neighborSimAndItems=scores
+        #for item in scores:
+            #neighborItems.append(item[1])
+        return neighborSimAndItems
     else:
-        return (averageOfUser + jiaquanAverage/simSums)
+        neighborSimAndItems = scores[0:k]
+        #for item in kscore:
+            #neighborItems.append(item[1])
+        return neighborSimAndItems
+#neighborItems此时是元组。包括相似度和相似度项目id。
+
+#预测评分
+def getRating(trainSet, presentUserid, presentItemid,sim):
+    neighborSimAndItems = topKMatches(trainSet, presentUserid, presentItemid, sim)
+    s=0  #代表分子。即当前用户对每个近邻物品的评分乘上该近邻物品与当前物品的相似度。然后再求和的结果。
+    simSum = 0
+    for i in neighborSimAndItems:
+        s = s + i[0] * trainSet[presentUserid][i[1]]
+        simSum+=i[0]
+
+    if simSum==0:
+        return 0
+    return s/simSum
 
 
 def getAllUserRating(fileTrain, fileTest, fileResult,i):
