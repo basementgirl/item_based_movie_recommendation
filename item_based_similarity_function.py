@@ -8,7 +8,7 @@ def sim_cos(train,item1,item2):
         if item1 in items and item2 in items:
             common_user.append(user)
     if len(common_user)==0:
-        return 0.2
+        return 0.3
 
     #numerator代表分子。denominator代表分母。
     numerator = sum([(train[user][item1] * train[user][item2]) for user in common_user])
@@ -26,7 +26,7 @@ def sim_adcos(train,item1,item2):
         if item1 in items and item2 in items:
             common_user.append(user)
     if len(common_user)==0:
-        return 0.2
+        return 0.3
 
     # numerator代表分子。denominator代表分母。
     numerator = 0
@@ -57,7 +57,7 @@ def sim_pearson(train,item1,item2):
 
     #没有共同用户的i情况。则默认相似度为0.3。
     if len(common_user) == 0:
-        return 0.2
+        return 0.3
 
     #存放item1的所有评分值
     all_scores_for_item1=[]
