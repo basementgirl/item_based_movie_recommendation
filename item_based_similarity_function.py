@@ -8,17 +8,15 @@ def sim_cos(train,item1,item2):
         if item1 in items and item2 in items:
             common_user.append(user)
     if len(common_user)==0:
-        return 0
+        return 0.2
 
     #numerator代表分子。denominator代表分母。
     numerator = sum([(train[user][item1] * train[user][item2]) for user in common_user])
     sq1 = sqrt(sum([pow(train[user][item1], 2) for user in common_user]))
     sq2 = sqrt(sum([pow(train[user][item2], 2) for user in common_user]))
     denominator = sq1 * sq2
-    if denominator==0:
-        return 0
-    else:
-        return numerator/denominator
+
+    return numerator/denominator
 
 
 #定义修正余弦相似度函数
@@ -28,7 +26,7 @@ def sim_adcos(train,item1,item2):
         if item1 in items and item2 in items:
             common_user.append(user)
     if len(common_user)==0:
-        return 0
+        return 0.2
 
     # numerator代表分子。denominator代表分母。
     numerator = 0
@@ -47,8 +45,7 @@ def sim_adcos(train,item1,item2):
         sq2=pow((train[user][item2]-avg1),2)
         item2_sum += sq2
     denominator=sqrt(item1_sum)*sqrt(item2_sum)
-    if denominator==0:
-        return 0
+
     return numerator/denominator
 
 
@@ -57,8 +54,10 @@ def sim_pearson(train,item1,item2):
     for (user, items) in train.items():
         if item1 in items and item2 in items:
             common_user.append(user)
+
+    #没有共同用户的i情况。则默认相似度为0.3。
     if len(common_user) == 0:
-        return 0
+        return 0.2
 
     #存放item1的所有评分值
     all_scores_for_item1=[]
@@ -68,6 +67,8 @@ def sim_pearson(train,item1,item2):
     for (user, items) in train.items():
         if item1 in items:
             all_scores_for_item1.append(train[user][item1])
+
+    #此书既然有了具有共同评价过这两个商品的用户，则说明这个用户一定被评价过。不是冷启动项目。所以len(all_scores_for_item1)>0。
     avg_item1=sum(all_scores_for_item1)/len(all_scores_for_item1)
 
     for (user, items) in train.items():
@@ -77,7 +78,6 @@ def sim_pearson(train,item1,item2):
 
     numerator = sum([(train[user][item1] - avg_item1) * (train[user][item2] - avg_item2) for user in common_user])
     denominator=sqrt(sum([pow((train[user][item1]-avg_item1),2) for user in common_user]))*sqrt(sum([pow((train[user][item2]-avg_item2),2) for user in common_user]))
-    if denominator==0:
-        return 0
+
     return numerator/denominator
 
