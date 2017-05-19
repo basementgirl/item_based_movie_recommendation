@@ -1,6 +1,5 @@
 from load_movielens import loadMovieLensTrain
 from load_movielens import loadMovieLensTest
-from math import sqrt
 from item_based_similarity_function import sim_adcos
 from item_based_similarity_function import sim_cos
 from item_based_similarity_function import sim_pearson
@@ -9,7 +8,7 @@ start_time=time.time()
 
 
 def topKMatches(trainSet, presentUserid, presentItemid, sim,k=30):
-    scores = [(sim(trainSet, presentUserid, other),other) for other in trainSet[presentUserid] if other!=presentItemid]
+    scores = [(sim(trainSet, presentItemid, other),other) for other in trainSet[presentUserid] if other!=presentItemid]
     scores.sort()
     scores.reverse()
 
