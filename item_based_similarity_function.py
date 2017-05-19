@@ -20,6 +20,7 @@ def sim_cos(train,item1,item2):
     else:
         return numerator/denominator
 
+
 #定义修正余弦相似度函数
 def sim_adcos(train,item1,item2):
     common_user=[]
@@ -80,11 +81,3 @@ def sim_pearson(train,item1,item2):
         return 0
     return numerator/denominator
 
-
-
-
-'''
-testSet=loadMovieLensTest('u1.test')
-for presentUserid in testSet:
-    for presentItem in testSet[presentUserid]:
-        print(sim_cos(testSet,presentUserid,presentItem))'''
