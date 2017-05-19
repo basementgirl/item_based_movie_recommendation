@@ -9,7 +9,7 @@ def sim_adcos(prefer, person1, person2):
             sim[item] = 1
 
     if len(sim)==0:
-        return -1
+        return 0.3
     sum1=sum([prefer[person1][item] for item in prefer[person1]])
     sum2=sum([prefer[person2][item] for item in prefer[person2]])
     n1=len(prefer[person1])
@@ -31,7 +31,7 @@ def sim_pearson(prefer, person1, person2):
             sim[item] = 1
 
     if len(sim)==0:
-        return -1
+        return 0.3
     sum1=sum([prefer[person1][item] for item in prefer[person1]])
     sum2=sum([prefer[person2][item] for item in prefer[person2]])
     n1=len(prefer[person1])
