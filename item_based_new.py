@@ -8,6 +8,7 @@ start_time=time.time()
 
 
 def topKMatches(trainSet, presentUserid, presentItemid, sim,k=30):
+    #假如当前用户不是新用户，有评价过的项目x。但x和当前项目没有共同用户。则默认相似度为0.3。（见相似度函数）
     scores = [(sim(trainSet, presentItemid, other),other) for other in trainSet[presentUserid] if other!=presentItemid]
     scores.sort()
     scores.reverse()
@@ -21,30 +22,42 @@ def topKMatches(trainSet, presentUserid, presentItemid, sim,k=30):
 #neighborSimAndItems此时是以元组为元素的列表。每个元组包括包括邻居项目与当前项目的相似度以及邻居项目id。
 
 
-def getAverage(trainSet, itemid):
-    all_scores_for_item=[]
+
+def getItemAverage(trainSet, itemid):
+    all_scores_for_item=[] #存放所有用户对这个项目的评分。
     for (user, items) in trainSet.items():
         if itemid in items:
             all_scores_for_item.append(trainSet[user][itemid])
-    avg_item=sum(all_scores_for_item)/len(all_scores_for_item)
-    return avg_item
+    else:
+        avg_item=sum(all_scores_for_item)/len(all_scores_for_item)
+        return avg_item
 
 
 #预测评分
 def getRating(trainSet, presentUserid, presentItemid,sim):
-    neighborSimAndItems = topKMatches(trainSet, presentUserid, presentItemid, sim)
-    s=0  #代表分子。即当前用户对每个近邻物品的评分乘上该近邻物品与当前物品的相似度。然后再求和的结果。
-    simSum = 0
-    avgOfPresentItem=getAverage(trainSet,presentItemid)
+    all_scores_for_item = []  # 存放所有用户对这个项目的评分。
+    for (user, items) in trainSet.items():
+        if presentItemid in items:
+            all_scores_for_item.append(trainSet[user][presentItemid])
+    if presentUserid not in trainSet:
+        if len(all_scores_for_item)==0:
+            return 3
+        #如果当前用户是新用户，当前商品又是新项目。则返回默认评分3.
+        else:
+            return sum(all_scores_for_item)/len(all_scores_for_item)
+        #如果当前用户是新用户，但当前商品不是新项目，则返回当前商品的平均评分。
+    else:
+        #如果当前用户不是新用户。则其一定有评价过的其他项目。这就有了当前物品的备选邻居。
+        neighborSimAndItems = topKMatches(trainSet, presentUserid, presentItemid, sim)
+        s=0  #代表分子。即当前用户对每个近邻物品的评分乘上该近邻物品与当前物品的相似度。然后再求和的结果。
+        simSum = 0
+        avgOfPresentItem=sum(all_scores_for_item)/len(all_scores_for_item)
 
-    for i in neighborSimAndItems:
-        avgOfNeighborItem = getAverage(trainSet, i[1])
-        s = s + abs(i[0]) * (trainSet[presentUserid][i[1]]-avgOfNeighborItem)
-        simSum+=abs(i[0])
-
-    if simSum==0:
-        return sum([trainSet[presentUserid][item] for item in trainSet[presentUserid]])/len(trainSet[presentUserid])
-    return avgOfPresentItem+s/simSum
+        for i in neighborSimAndItems:
+            avgOfNeighborItem = getItemAverage(trainSet, i[1])
+            s = s + abs(i[0]) * (trainSet[presentUserid][i[1]]-avgOfNeighborItem)
+            simSum+=abs(i[0])
+        return avgOfPresentItem+s/simSum
 
 
 def getAllUserRating(fileTrain, fileTest, fileResult,sim):
