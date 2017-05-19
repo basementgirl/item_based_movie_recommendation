@@ -15,15 +15,12 @@ def topKMatches(trainSet, presentUserid, presentItemid, sim,k=30):
 
     if len(scores)<=k:
         neighborSimAndItems=scores
-        #for item in scores:
-            #neighborItems.append(item[1])
         return neighborSimAndItems
     else:
         neighborSimAndItems = scores[0:k]
-        #for item in kscore:
-            #neighborItems.append(item[1])
         return neighborSimAndItems
-#neighborItems此时是元组。包括相似度和相似度项目id。
+#neighborSimAndItems此时是以元组为元素的列表。每个元组包括包括邻居项目与当前项目的相似度以及邻居项目id。
+
 
 #预测评分
 def getRating(trainSet, presentUserid, presentItemid,sim):
@@ -39,7 +36,7 @@ def getRating(trainSet, presentUserid, presentItemid,sim):
     return s/simSum
 
 
-def getAllUserRating(fileTrain, fileTest, fileResult,i):
+def getAllUserRating(fileTrain, fileTest, fileResult,sim):
     trainSet = loadMovieLensTrain(fileTrain)
     testSet = loadMovieLensTest(fileTest)
     inAllnum = 0
@@ -70,4 +67,4 @@ if __name__ == "__main__":
         print('item based with %s is finished!'%i)
         print(time.time() - start_time)
     print("Report, master,the program is finished!")
-    print(time.time() - start_time)
+    print('Total running time is :',time.time() - start_time)
