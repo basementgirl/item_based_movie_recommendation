@@ -11,22 +11,21 @@ start_time=time.time()
 
 def topKMatches(trainSet, presentUserid, presentItemid, sim,k=30):
     userSet = []#userSet表示评价过当前商品的所有用户
-    neighborUsers = []#neighborUsers最近邻居用户。
+
     for user in trainSet:
         if presentItemid in trainSet[user]:
             userSet.append(user)
     scores = [(sim(trainSet, presentUserid, other),other) for other in userSet if other!=presentUserid]
     scores.sort()
     scores.reverse()
-    if len(scores)<=k:       
-        for item in scores:
-            neighborUsers.append(item[1])
-        return neighborUsers
+    # neighborSimAndUsers最近邻居用户。
+    if len(scores)<=k:
+        neighborSimAndUsers=scores
+        return neighborSimAndUsers
     else:                  
         kscore = scores[0:k]
-        for item in kscore:
-            neighborUsers.append(item[1])
-        return neighborUsers
+        neighborSimAndUsers = kscore
+        return neighborSimAndUsers
 
 
 def getAverage(prefer, userId):
@@ -39,22 +38,21 @@ def getAverage(prefer, userId):
 
 
 def getRating(trainSet, presentUserid, presentItemid,sim):
-    jiaquanAverage = 0.0
-    simSums = 0.0
-    neighborUsers = topKMatches(trainSet, presentUserid, presentItemid, sim)
+    neighborSimAndUsers = topKMatches(trainSet, presentUserid, presentItemid, sim)
     averageOfUser = getAverage(trainSet, presentUserid)
-    for other in neighborUsers:
-        similarity = sim(trainSet, presentUserid, other)
-        averageOther = getAverage(trainSet, other)
-        simSums += abs(similarity )
-        jiaquanAverage +=  (trainSet[other][presentItemid]-averageOther)*similarity
-    if simSums==0:
+    s=0
+    simSum = 0
+    for i in neighborSimAndUsers:
+        averageOfneighborUser = getAverage(trainSet, i[1])
+        s = s + i[0] * (trainSet[i[1]][presentItemid]-averageOfneighborUser)
+        simSum+=i[0]
+    if simSum==0:
         return averageOfUser
-    else:
-        return (averageOfUser + jiaquanAverage/simSums)  
+
+    return (averageOfUser + s/simSum)
 
 
-def getAllUserRating(fileTrain, fileTest, fileResult,i):
+def getAllUserRating(fileTrain, fileTest, fileResult,sim):
     trainSet = loadMovieLensTrain(fileTrain)
     testSet = loadMovieLensTest(fileTest)
     inAllnum = 0

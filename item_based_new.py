@@ -32,7 +32,7 @@ def getRating(trainSet, presentUserid, presentItemid,sim):
         simSum+=i[0]
 
     if simSum==0:
-        return 0
+        return sum([trainSet[presentUserid][item] for item in trainSet[presentUserid]])/len(trainSet[presentUserid])
     return s/simSum
 
 
