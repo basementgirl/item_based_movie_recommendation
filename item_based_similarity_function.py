@@ -45,7 +45,8 @@ def sim_adcos(train,item1,item2):
         sq2=pow((train[user][item2]-avg1),2)
         item2_sum += sq2
     denominator=sqrt(item1_sum)*sqrt(item2_sum)
-
+    if denominator==0:#这种情况之前没想到。意思是假如共同用户只评价过这一个。则其均值和该评价相同。则出现0.
+        return 0.3
     return numerator/denominator
 
 

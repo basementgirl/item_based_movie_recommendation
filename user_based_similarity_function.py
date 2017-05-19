@@ -56,7 +56,7 @@ def sim_cos(prefer, person1, person2):
             sim[item] = 1
 
     if len(sim)==0:
-        return -1
+        return 0.3
     summulti=sum([(prefer[person1][item] * prefer[person2][item]) for item in sim ])
     sq1=sqrt(sum([pow(prefer[person1][item], 2) for item in sim]))
     sq2=sqrt(sum([pow(prefer[person2][item], 2) for item in sim]))
