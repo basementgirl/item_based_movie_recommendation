@@ -44,8 +44,8 @@ def getRating(trainSet, presentUserid, presentItemid,sim):
     simSum = 0
     for i in neighborSimAndUsers:
         averageOfneighborUser = getAverage(trainSet, i[1])
-        s = s + i[0] * (trainSet[i[1]][presentItemid]-averageOfneighborUser)
-        simSum+=i[0]
+        s = s + abs(i[0]) * (trainSet[i[1]][presentItemid]-averageOfneighborUser)
+        simSum+=abs(i[0])
     if simSum==0:
         return averageOfUser
 
