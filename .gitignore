@@ -3,11 +3,15 @@
 *.pyc/
 __pycache__/
 
-
 movielens/
 u1result.csv/
 user_based_with_sim_cos/
 user_based_with_sim_adcos/
 user_based_with_sim_pearson/
+
+item_based_with_sim_cos/
+item_based_with_sim_adcos/
+item_based_with_sim_pearson/
+
 item_based/
 mae.png/
