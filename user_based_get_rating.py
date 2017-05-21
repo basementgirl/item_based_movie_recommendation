@@ -28,28 +28,45 @@ def topKMatches(trainSet, presentUserid, presentItemid, sim,k=30):
         return neighborSimAndUsers
 
 
-def getAverage(prefer, userId):
+def getUserAverage(trainSet, userid):
     count = 0
     sum = 0
-    for item in prefer[userId]:
-        sum = sum + prefer[userId][item]
+    for item in trainSet[userid]:
+        sum = sum + trainSet[userid][item]
         count = count+1
     return sum/count
 
 
-def getRating(trainSet, presentUserid, presentItemid,sim):
-    neighborSimAndUsers = topKMatches(trainSet, presentUserid, presentItemid, sim)
-    averageOfUser = getAverage(trainSet, presentUserid)
-    s=0
-    simSum = 0
-    for i in neighborSimAndUsers:
-        averageOfneighborUser = getAverage(trainSet, i[1])
-        s = s + abs(i[0]) * (trainSet[i[1]][presentItemid]-averageOfneighborUser)
-        simSum+=abs(i[0])
-    if simSum==0:
-        return averageOfUser
 
-    return (averageOfUser + s/simSum)
+def getRating(trainSet, presentUserid, presentItemid,sim):
+    all_scores_for_item = []  # 存放所有用户对这个项目的评分。
+    for (user, items) in trainSet.items():
+        if presentItemid in items:
+            all_scores_for_item.append(trainSet[user][presentItemid])
+    if presentUserid not in trainSet:
+        if len(all_scores_for_item) == 0:
+            return 3
+        # 如果当前用户是新用户，当前商品又是新项目。则返回默认评分3.
+        else:
+            return sum(all_scores_for_item) / len(all_scores_for_item)
+            # 如果当前用户是新用户，但当前商品不是新项目，则返回当前商品的平均评分。
+    else:
+        if len(all_scores_for_item) == 0:
+            return getUserAverage(trainSet, presentUserid)
+        # 如果当前用户不是新用户，但当前商品是新项目。则返回当前用户的平均评分
+        else:
+            neighborSimAndUsers = topKMatches(trainSet, presentUserid, presentItemid, sim)
+            averageOfUser = getUserAverage(trainSet, presentUserid)
+            s=0
+            simSum = 0
+            for i in neighborSimAndUsers:
+                averageOfneighborUser = getUserAverage(trainSet, i[1])
+                s = s + abs(i[0]) * (trainSet[i[1]][presentItemid]-averageOfneighborUser)
+                simSum+=abs(i[0])
+            if simSum==0:
+                return averageOfUser
+
+            return (averageOfUser + s/simSum)
 
 
 def getAllUserRating(fileTrain, fileTest, fileResult,sim):

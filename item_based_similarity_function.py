@@ -79,6 +79,7 @@ def sim_pearson(train,item1,item2):
 
     numerator = sum([(train[user][item1] - avg_item1) * (train[user][item2] - avg_item2) for user in common_user])
     denominator=sqrt(sum([pow((train[user][item1]-avg_item1),2) for user in common_user]))*sqrt(sum([pow((train[user][item2]-avg_item2),2) for user in common_user]))
-
+    if denominator==0:#这种情况之前没想到。意思是假如共同用户只评价过这一个。则其均值和该评价相同。则出现0.
+        return 0.3
     return numerator/denominator
 

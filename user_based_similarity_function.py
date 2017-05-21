@@ -20,6 +20,8 @@ def sim_adcos(prefer, person1, person2):
     sq1=sqrt(sum([pow((prefer[person1][item]-avg1),2) for item in prefer[person1]]))
     sq2=sqrt(sum([pow((prefer[person2][item]-avg2),2) for item in prefer[person2]]))
     sq=sq1*sq2
+    if sq==0:
+        return 0.3
     result=summulti/sq
     return result
 
@@ -43,7 +45,7 @@ def sim_pearson(prefer, person1, person2):
     sq2=sqrt(sum([pow((prefer[person2][item]-avg2),2) for item in sim]))
     sq=sq1*sq2
     if sq==0:
-        return 0
+        return 0.3
     result=summulti/sq
     return result
 
@@ -62,7 +64,7 @@ def sim_cos(prefer, person1, person2):
     sq2=sqrt(sum([pow(prefer[person2][item], 2) for item in sim]))
     sq=sq1*sq2
     if sq==0:
-        return 0
+        return 0.3
     result=summulti/sq
     return result
 
