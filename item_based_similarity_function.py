@@ -69,7 +69,7 @@ def sim_pearson(train,item1,item2):
         if item1 in items:
             all_scores_for_item1.append(train[user][item1])
 
-    #此书既然有了具有共同评价过这两个商品的用户，则说明这个用户一定被评价过。不是冷启动项目。所以len(all_scores_for_item1)>0。
+    #既然有了具有共同评价过这两个商品的用户，则说明这个用户一定被评价过。不是冷启动项目。所以len(all_scores_for_item1)>0。
     avg_item1=sum(all_scores_for_item1)/len(all_scores_for_item1)
 
     for (user, items) in train.items():

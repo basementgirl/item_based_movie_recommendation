@@ -36,9 +36,8 @@ def getItemAverage(trainSet, itemid):
     for (user, items) in trainSet.items():
         if itemid in items:
             all_scores_for_item.append(trainSet[user][itemid])
-    else:
-        avg_item=sum(all_scores_for_item)/len(all_scores_for_item)
-        return avg_item
+    avg_item=sum(all_scores_for_item)/len(all_scores_for_item)
+    return avg_item
 
 
 #预测评分
