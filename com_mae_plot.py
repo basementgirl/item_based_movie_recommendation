@@ -82,7 +82,7 @@ plt.plot(range(1,6),lst_item_with_pearson,label='item_based_with_pearson')
 
 plt.legend(loc=0)
 plt.grid()
-plt.xlabel('train set')
+plt.xlabel('Train sets')
 plt.ylabel('MAE')
 plt.savefig('similarityCompare')
 plt.show()
