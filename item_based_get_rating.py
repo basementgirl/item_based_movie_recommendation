@@ -1,118 +1,104 @@
 from load_movielens import loadMovieLensTrain
 from load_movielens import loadMovieLensTest
-from math import sqrt
+from item_based_similarity_function import sim_adcos
+from item_based_similarity_function import sim_cos
+from item_based_similarity_function import sim_pearson
 import time
 start_time=time.time()
 
 
-#得到物品之间的相似度。W是用来项目之间相似度的矩阵。
-def itemSimilarity(train):
-    # 建立物品-物品的共现矩阵
-    C = dict()  # 物品-物品的共现矩阵
-    N = dict()  # 物品被多少个不同用户购买
-    for user, items in train.items():
-        for i in items.keys():
-            N.setdefault(i, 0)
-            N[i] += 1
-            C.setdefault(i, {})
-            for j in items.keys():
-                if i == j: continue
-                C[i].setdefault(j, 0)
-                C[i][j] += 1
-                # 计算相似度矩阵
+def topKMatches(trainSet, presentUserid, presentItemid, sim,k=30):
+    #假如当前用户不是新用户，有评价过的项目x。但x和当前项目没有共同用户。则默认相似度为0.3。（见相似度函数）
+    scores = [(sim(trainSet, presentItemid, other),other) for other in trainSet[presentUserid] if other!=presentItemid]
+    scores.sort()
+    scores.reverse()
 
-    # w指相似度。
-    W = dict()
-    for i, related_items in C.items():
-        W.setdefault(i, {})
-        for j, cij in related_items.items():
-            W[i][j] = cij / (sqrt(N[i] * N[j]))
-    return C,N,W
+    if len(scores)<=k:
+        neighborSimAndItems=scores
+        return neighborSimAndItems
+    else:
+        neighborSimAndItems = scores[0:k]
+        return neighborSimAndItems
+#neighborSimAndItems此时是以元组为元素的列表。每个元组包括包括邻居项目与当前项目的相似度以及邻居项目id。
 
-def getAverage(prefer, userId):
+
+def getUserAverage(trainSet, userid):
     count = 0
     sum = 0
-    for item in prefer[userId]:
-        sum = sum + prefer[userId][item]
+    for item in trainSet[userid]:
+        sum = sum + trainSet[userid][item]
         count = count+1
     return sum/count
 
 
-#获取当前要预测的项目的最近邻居项目。
-def topKMatches(train, w,userid, itemid, k=30):
-    #item_set是该用户评价过的所有商品。
-    item_set=[]
-    #items才是当前待评价商品的最近邻居商品。
-    items=[]
+def getItemAverage(trainSet, itemid):
+    all_scores_for_item=[] #存放所有用户对这个项目的评分。
+    for (user, items) in trainSet.items():
+        if itemid in items:
+            all_scores_for_item.append(trainSet[user][itemid])
+    avg_item=sum(all_scores_for_item)/len(all_scores_for_item)
+    return avg_item
 
-    for item in train[userid]:
-        item_set.append(item)
 
-    scores = [(w[itemid][item], item) for item in item_set if itemid != item and item in w[itemid]]
-
-    scores.sort()
-    scores.reverse()
-    if len(scores) <= k:
-        for item in scores:
-            items.append(item)
+#预测评分
+def getRating(trainSet, presentUserid, presentItemid,sim):
+    all_scores_for_item = []  # 存放所有用户对这个项目的评分。
+    for (user, items) in trainSet.items():
+        if presentItemid in items:
+            all_scores_for_item.append(trainSet[user][presentItemid])
+    if presentUserid not in trainSet:
+        if len(all_scores_for_item)==0:
+            return 3
+        #如果当前用户是新用户，当前商品又是新项目。则返回默认评分3.
+        else:
+            return sum(all_scores_for_item)/len(all_scores_for_item)
+        #如果当前用户是新用户，但当前商品不是新项目，则返回当前商品的平均评分。
     else:
-        kscore = scores[0:k]
-        for item in kscore:
-            items.append(item)
-        #items表示最近邻项目。及这些最近邻居项目与待预测项目的相似度。它是由元组构成的列表。每一个元组都由相似度和邻居id组成。
-    return items
+        if len(all_scores_for_item)==0:
+            return getUserAverage(trainSet, presentUserid)
+        #如果当前用户不是新用户，但当前商品是新项目。则返回当前用户的平均评分
+        else:
+        # 如果当前用户不是新用户。当前商品又不是新商品。则按正常流程来。
+            neighborSimAndItems = topKMatches(trainSet, presentUserid, presentItemid, sim)
+            s=0  #代表分子。即当前用户对每个近邻物品的评分乘上该近邻物品与当前物品的相似度。然后再求和的结果。
+            simSum = 0
+            avgOfPresentItem=sum(all_scores_for_item)/len(all_scores_for_item)
+
+            for i in neighborSimAndItems:
+                avgOfNeighborItem = getItemAverage(trainSet, i[1])
+                s = s + abs(i[0]) * (trainSet[presentUserid][i[1]]-avgOfNeighborItem)
+                simSum+=abs(i[0])
+            return avgOfPresentItem+s/simSum
 
 
-#获取测试集中每个用户对每个商品的预测评分
-def getRating(train,w, userid, itemid):
-    if itemid not in w.keys():
-        s=getAverage(train, userid)
-        return s
-    else:
-        items = topKMatches(train,w, userid, itemid)
-        s=0
-        wight_count=0
-        for i in items:
-            s=s+i[0]*train[userid][i[1]]
-            wight_count+=i[0]
-        return s/wight_count
-
-
-#通过调用getRating函数来获取预测评分。
-def getAllRating(trainFilename, testFilename, fileResult):
-    print("start load train data :")
-    train = loadMovieLensTrain(trainFilename)
-
-    print("start load test data :")
-    test = loadMovieLensTest(testFilename)
-
-    print("start caculate C,N,W :")
-    C,N,W = itemSimilarity(train)
-    print("end caculate C,N,W")
-
+def getAllUserRating(fileTrain, fileTest, fileResult,sim):
+    trainSet = loadMovieLensTrain(fileTrain)
+    testSet = loadMovieLensTest(fileTest)
     inAllnum = 0
     file = open(fileResult, 'w')
-    for userid in test:
-        for itemid in test[userid]:
-            rating = getRating(train,W, userid, itemid)
-            file.write('%s,%s,%s\n'%(userid, itemid, rating))
+    for presentUserid in testSet:
+        for presentItem in testSet[presentUserid]:
+            rating = getRating(trainSet, presentUserid, presentItem,sim)
+            file.write('%s,%s,%.4f\n'%(presentUserid, presentItem, rating))
             inAllnum = inAllnum +1
-            print("complete : %d"%inAllnum)
     file.close()
-    print("-------------Completed!!-----------",inAllnum)
-
+    print("a train set is done",inAllnum)
 
 
 if __name__ == "__main__":
-    print("\n--------------The program is running, please wait!... -----------\n")
-    for i in range(1,6):
-        getAllRating('u%d.base'%i, 'u%d.test'%i, 'u%dresult.csv'%i)
-        print('The %d st is done,please wait!'%i)
-        print(time.time()-start_time)
-
-
-
-
-
-
-
+    print("The program is running, please wait!")
+    for i in ('sim_pearson','sim_adcos'):
+        if i=='sim_cos':
+            sim=sim_cos
+        elif i=='sim_adcos':
+            sim=sim_adcos
+        else:
+            sim=sim_pearson
+        print('item based with %s is running ,please wait!'%i)
+        for j in range(1,6):
+            getAllUserRating('u%d.base'%j, 'u%d.test'%j, 'item_based_with_%s/u%dpredict.csv'%(i,j),sim)
+            print('The %d st train set is done,please wait!'%j)
+        print('item based with %s is finished!'%i)
+        print(time.time() - start_time)
+    print("Report, master,the program is finished!")
+    print('Total running time is :',time.time() - start_time)
