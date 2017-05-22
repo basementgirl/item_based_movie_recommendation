@@ -29,7 +29,6 @@ def itemSimilarity(train):
             W[i][j] = cij / (sqrt(N[i] * N[j]))
     return C,N,W
 
-
 def getAverage(prefer, userId):
     count = 0
     sum = 0
