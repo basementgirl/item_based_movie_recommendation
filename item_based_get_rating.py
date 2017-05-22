@@ -87,7 +87,7 @@ def getAllUserRating(fileTrain, fileTest, fileResult,sim):
 
 if __name__ == "__main__":
     print("The program is running, please wait!")
-    for i in ('sim_pearson','sim_adcos'):
+    for i in ('sim_cos','sim_pearson','sim_adcos'):
         if i=='sim_cos':
             sim=sim_cos
         elif i=='sim_adcos':
