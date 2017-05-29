@@ -1,5 +1,5 @@
-from load_movielens import loadMovieLensTrain
-from load_movielens import loadMovieLensTest
+from load_movielens import loadMovieLensToDict
+from load_movielens import loadMovieLensToDict
 from item_based_similarity_function import sim_adcos
 from item_based_similarity_function import sim_cos
 from item_based_similarity_function import sim_pearson
@@ -72,8 +72,8 @@ def getRating(trainSet, presentUserid, presentItemid,sim):
 
 
 def getAllUserRating(fileTrain, fileTest, fileResult,sim):
-    trainSet = loadMovieLensTrain(fileTrain)
-    testSet = loadMovieLensTest(fileTest)
+    trainSet = loadMovieLensToDict(fileTrain)
+    testSet = loadMovieLensToDict(fileTest)
     inAllnum = 0
     file = open(fileResult, 'w')
     for presentUserid in testSet:
